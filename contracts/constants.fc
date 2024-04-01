@@ -1,0 +1,42 @@
+;; ------------- OPCODES -------------
+const int op::excesses = 0xd53276db;
+const int op::jetton_transfer = 0xf8a7ea5;
+const int op::claim_tokens = 0x3651a88c;
+
+
+;; ------------- ERRORS -------------
+const int error::unauthorized = 401;
+const int error::nothing_to_claim = 402;
+const int error::not_enough_ton = 403;
+
+
+;; ------------- CONSTANTS -------------
+const int flag::bounceable = 0x18;
+const int flag::non_bounceable = 0x10;
+
+const int mode::normal = 0;
+const int mode::remaining_amount = 64;
+const int mode::available_balance = 128;
+const int flag::gas_separately = 1;
+const int flag::ignore_errors = 2;
+const int flag::bounce_on_fail = 16;
+const int flag::destroy = 32;
+
+const int WORKCHAIN = 0;
+const int LOCKUP_CONTRACT_GAS_USAGE = 10000; ;; 8379 with the reserve
+const int LOCKUP_CONTRACT_STATE_MAX_CELLS = 21;
+const int LOCKUP_CONTRACT_STATE_MAX_BITS = 9421;
+
+;; max in context of this contract
+const int TRANSFER_PAYLOAD_MAX_BITS = 768; ;; 32 + 64 + 124 + 267 + 267 + 1 + 12 + 1
+const int TRANSFER_PAYLOAD_MAX_CELLS = 1;
+
+const int JETTON_WALLET_GAS_USAGE = 15000; ;; https://github.com/ton-blockchain/token-contract/blob/21e7844fa6dbed34e0f4c70eb5f0824409640a30/ft/jetton-wallet.fc#L22C28-L22C36
+const int JETTON_WALLET_INIT_CELLS = 21;
+const int JETTON_WALLET_INIT_BITS = 7250;
+const int JETTON_WALLET_INIT_MAX_CELLS = 21;
+const int JETTON_WALLET_STATE_MAX_BITS = 7480;
+const int JETTON_WALLET_STORAGE = 10000000; ;; https://github.com/ton-blockchain/token-contract/blob/21e7844fa6dbed34e0f4c70eb5f0824409640a30/ft/jetton-wallet.fc#L15C33-L15C41
+
+const int ONE_YEAR = 60 * 60 * 24 * 365;
+const int FIVE_YEAR = 60 * 60 * 24 * 365 * 5;

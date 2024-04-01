@@ -1,0 +1,25 @@
+bool_false$0 = Bool;
+bool_true$1 = Bool;
+
+nothing$0 {X:Type} = Maybe X;
+just$1 {X:Type} value:X = Maybe X;
+anycast_info$_ depth:(#<= 30) { depth >= 1 } rewrite_pfx:(bits depth) = Anycast;
+addr_std$10 anycast:(Maybe Anycast) workchain_id:int8 address:bits256  = MsgAddressInt;
+
+var_uint$_ {n:#} len:(#< n) value:(uint (len * 8)) = VarUInteger n;
+nanograms$_ amount:(VarUInteger 16) = Grams;
+_ grams:Grams = Coins;
+
+
+
+_ jetton_wallet:MsgAddressInt cliff_end_date:uint32 cliff_numerator:uint16 cliff_denominator:uint16
+  vesting_period:uint32 vesting_numerator:uint16 vesting_denominator:uint16 cliff_unlock_amount:Coins
+  vesting_unlock_amount:Coins unlocks_count:uint16 = VestingData; // 659 bits
+_ admin_address:MsgAddressInt claimer_address:MsgAddressInt token_balance:Coins token_claimed:Coins
+  last_claimed:uint32 vesting_data:^VestingData = VestingLockupStorage; // 814 bits
+
+init_contract#_ token_balance:Coins jetton_wallet_address:MsgAddressInt cliff_end_date:uint32
+  cliff_numerator:uint16 cliff_denominator:uint16 vesting_period:uint32 vesting_numerator:uint16
+  vesting_denominator:uint16 unlocks_count:uint16 = InternalMsgBody; // 535 bits
+
+claim_tokens#3651a88c query_id:uint64 = InternalMsgBody;
