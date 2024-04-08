@@ -163,10 +163,16 @@ int min_fee() inline {
     if (op == op::claim_tokens) {
         in_msg_body.end_parse();
         throw_unless(error::unauthorized, equal_slices(message::sender, storage::claimer_address));
+
+        int storage_due = my_storage_due();
+        msg_value -= storage_due;
         throw_unless(error::not_enough_ton, msg_value >= min_fee());
         int claimable_tokens = claimable_tokens();
         throw_unless(error::nothing_to_claim, claimable_tokens > 0);
 
+        ifnot (claimable_tokens == storage::token_balance) {
+            raw_reserve(storage_due, 4);
+        }
         cell transfer_payload = begin_cell()
             .store_uint(op::jetton_transfer, 32)
             .store_uint(query_id, 64)
@@ -184,7 +190,7 @@ int min_fee() inline {
             .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
             .store_ref(transfer_payload)
             .end_cell();
-        send_raw_message(msg, 64);
+        send_raw_message(msg, 128);
 
         storage::token_claimed += claimable_tokens;
         storage::last_claimed = now();

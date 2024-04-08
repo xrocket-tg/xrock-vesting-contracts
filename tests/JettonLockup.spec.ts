@@ -22,7 +22,6 @@ import { compile } from '@ton/blueprint';
 import { randomAddress } from '@ton/test-utils';
 import { ERRORS, JETTON_WALLET_CODE, OPCODES } from '../wrappers/Config';
 import { printTransactionFees } from './utils/printTransactionFees';
-import { AccountStateActive } from '@ton/core/dist/types/AccountState';
 import { collectCellStats } from './utils/gas';
 
 describe('JettonLockup', () => {

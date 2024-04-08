@@ -23,9 +23,9 @@ const int flag::bounce_on_fail = 16;
 const int flag::destroy = 32;
 
 const int WORKCHAIN = 0;
-const int LOCKUP_CONTRACT_GAS_USAGE = 10000; ;; 8379 with the reserve
-const int LOCKUP_CONTRACT_STATE_MAX_CELLS = 21;
-const int LOCKUP_CONTRACT_STATE_MAX_BITS = 9421;
+const int LOCKUP_CONTRACT_GAS_USAGE = 10000; ;; 9102 with the reserve
+const int LOCKUP_CONTRACT_STATE_MAX_CELLS = 23;
+const int LOCKUP_CONTRACT_STATE_MAX_BITS = 10017;
 
 ;; max in context of this contract
 const int TRANSFER_PAYLOAD_MAX_BITS = 768; ;; 32 + 64 + 124 + 267 + 267 + 1 + 12 + 1
