@@ -100,6 +100,7 @@ int min_fee() inline {
     int flags = cs~load_int(4);
     message::sender = cs~load_msg_addr();
 
+    load_data();
     if (flags & 1) {
         in_msg_body~skip_bits(32); ;; skip bounce flag
         int op = in_msg_body~load_uint(32);
@@ -109,12 +110,12 @@ int min_fee() inline {
             int amount = in_msg_body~load_coins();
             storage::token_claimed -= amount;
             storage::token_balance += amount;
+            save_data();
             return ();
         }
         return ();
     }
 
-    load_data();
     ifnot (storage::init?) {
         throw_unless(error::unauthorized, equal_slices(message::sender , storage::admin_address));
         storage::token_balance = in_msg_body~load_coins();
