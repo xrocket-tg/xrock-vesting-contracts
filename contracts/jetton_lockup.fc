@@ -188,7 +188,7 @@ int min_fee() inline {
             .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
             .store_ref(transfer_payload)
             .end_cell();
-        send_raw_message(msg, 128);
+        send_raw_message(msg, mode::remaining_amount + flag::bounce_on_fail);
 
         storage::token_claimed += claimable_tokens;
         storage::last_claimed = now();
