@@ -351,6 +351,70 @@ describe('JettonLockup', () => {
         }
     });
 
+    it('bounce', async () => {
+        const initialLockupData = await jettonLockup.getLockupData();
+        expect(initialLockupData.tokenClaimed).toBeLessThan(tokenBalanceConfig);
+        expect(initialLockupData.tokenBalance).toBeGreaterThan(0n);
+
+        const before = blockchain.snapshot();
+        await blockchain.setShardAccount(
+            lockupJettonWallet,
+            createShardAccount({
+                address: lockupJettonWallet,
+                code: JETTON_WALLET_CODE,
+                data: beginCell()
+                    .storeCoins(0)
+                    .storeAddress(jettonLockup.address)
+                    .storeAddress(jettonMasterAddress)
+                    .storeRef(JETTON_WALLET_CODE)
+                    .endCell(),
+                balance: 0n,
+            }),
+        );
+        blockchain.now! += extendedVestingDataConfig.vestingPeriod;
+        const message = internal({
+            from: claimer.address,
+            to: jettonLockup.address,
+            value: toNano('1'),
+            body: beginCell().storeUint(OPCODES.CLAIM_TOKENS, 32).storeUint(0, 64).endCell(),
+        });
+        let result = await blockchain.sendMessageIter(message);
+        let tx = await result.next();
+        expect(tx.value as BlockchainTransaction).toHaveTransaction({
+            from: claimer.address,
+            to: jettonLockup.address,
+            success: true,
+        });
+        tx = await result.next();
+        let lockupData = await jettonLockup.getLockupData();
+        expect(lockupData.tokenClaimed).toStrictEqual(tokenBalanceConfig);
+        expect(lockupData.lastClaimed).toStrictEqual(blockchain.now);
+        expect(lockupData.tokenBalance).toStrictEqual(0n);
+
+        expect(tx.value as BlockchainTransaction).toHaveTransaction({
+            from: jettonLockup.address,
+            to: lockupJettonWallet,
+            success: false,
+        });
+
+        tx = await result.next();
+        expect(tx.value as BlockchainTransaction).toHaveTransaction({
+            from: lockupJettonWallet,
+            to: jettonLockup.address,
+            success: true,
+            inMessageBounced: true,
+        });
+        lockupData = await jettonLockup.getLockupData();
+        expect(lockupData.tokenClaimed).toStrictEqual(initialLockupData.tokenClaimed);
+        expect(lockupData.tokenBalance).toStrictEqual(initialLockupData.tokenBalance);
+
+        tx = await result.next();
+        expect(tx.value).toBeUndefined();
+        expect(tx.done).toBeTruthy();
+
+        await blockchain.loadFrom(before);
+    });
+
     it('last vesting unlock', async () => {
         blockchain.now! += extendedVestingDataConfig.vestingPeriod - 1;
         let result = await jettonLockup.sendClaimTokens(claimer.getSender(), toNano('1'), 0n);
