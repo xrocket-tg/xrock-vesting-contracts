@@ -11,7 +11,7 @@ Namely, the contract allows to claim exactly `cliff_unlock_amount` jettons after
 
 The claimed tokens are transferred to the jetton wallet associated with the specified user wallet. Essentially this means transferring the tokens to the user.
 
-Once the vesting contract is deployed and initialized, the `token_balance` field is the overall number of tokens allocated for the vesting (it decreases on each claim). It's important to check that the jetton wallet associated with the contract actually have at least `token_balance` jettons on its balance. 
+Once the vesting contract is deployed and initialized, the `token_balance` field is the overall number of tokens allocated for the vesting (it decreases on each claim). It's important to check that the jetton wallet associated with the contract actually has at least `token_balance` jettons on its balance. 
 
 Maximal vesting duration is supposed to be at most 10 years.
 
