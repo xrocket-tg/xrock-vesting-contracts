@@ -9,9 +9,10 @@ export const OPCODES = {
 };
 
 export const ERRORS = {
-    UNAUTHORIZED: 401,
-    NOTHING_TO_CLAIM: 402,
-    NOT_ENOUGH_TON: 403,
+    UNAUTHORIZED: 50,
+    NOTHING_TO_CLAIM: 51,
+    NOT_ENOUGH_TON: 52,
+    INVALID_VESTING_PERIOD: 53,
 };
 
 export const JETTON_WALLET_CODE = Cell.fromBase64(

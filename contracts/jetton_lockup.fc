@@ -22,7 +22,7 @@ global cell storage::vesting_data;
 
 global slice message::sender;
 
-() load_data() impure inline {
+() load_data() impure inline_ref {
     slice ds = get_data().begin_parse();
 
     storage::admin_address = ds~load_msg_addr();
@@ -50,9 +50,12 @@ global slice message::sender;
     storage::cliff_unlock_amount = vesting_data~load_coins();
     storage::vesting_unlock_amount = vesting_data~load_coins();
     storage::unlocks_count = vesting_data~load_uint(16);
+
+    ds.end_parse();
+    vesting_data.end_parse();
 }
 
-() save_data() impure {
+() save_data() impure inline_ref {
     cell data = begin_cell()
         .store_slice(storage::admin_address)
         .store_slice(storage::claimer_address)
@@ -71,9 +74,7 @@ int claimable_tokens() inline {
     }
 
     int passed_periods = (now() - storage::cliff_end_date) / storage::vesting_period;
-    int unlocks_remaining = max(storage::unlocks_count - passed_periods, 0);
-
-    if (unlocks_remaining == 0) {
+    if (passed_periods >= storage::unlocks_count) {
         return storage::token_balance;
     }
 
@@ -90,9 +91,9 @@ int min_fee() inline {
         ;; lockup_wallet -> user_wallet (with state init)
         get_simple_forward_fee(WORKCHAIN, JETTON_WALLET_INIT_BITS, JETTON_WALLET_INIT_CELLS) +
         ;; lockup_wallet + user_wallet
-        get_compute_fee(WORKCHAIN, JETTON_WALLET_GAS_USAGE) * 2 +
-        ;; lockup_wallet + user_wallet
-        max(get_storage_fee(WORKCHAIN, ONE_YEAR, JETTON_WALLET_STATE_MAX_BITS, JETTON_WALLET_INIT_MAX_CELLS), JETTON_WALLET_STORAGE) * 2;
+        max(get_compute_fee(WORKCHAIN, JETTON_WALLET_GAS_USAGE), JETTON_WALLET_COMPUTE_FEE) * 2 +
+        ;; user_wallet
+        max(get_storage_fee(WORKCHAIN, ONE_YEAR, JETTON_WALLET_STATE_MAX_BITS, JETTON_WALLET_INIT_MAX_CELLS), JETTON_WALLET_STORAGE);
 }
 
 () recv_internal(int msg_value, cell in_msg_full, slice in_msg_body) impure {
@@ -132,6 +133,8 @@ int min_fee() inline {
         storage::unlocks_count = in_msg_body~load_uint(16);
         in_msg_body.end_parse();
 
+        throw_unless(error::invalid_vesting_period, storage::vesting_period > 0);
+
         storage::cliff_unlock_amount = muldiv(storage::token_balance, storage::cliff_numerator, storage::cliff_denominator);
         storage::vesting_unlock_amount = muldiv(storage::token_balance, storage::vesting_numerator, storage::vesting_denominator);
 
@@ -148,7 +151,7 @@ int min_fee() inline {
             .store_uint(storage::unlocks_count, 16)
             .end_cell();
 
-        raw_reserve(get_storage_fee(WORKCHAIN, FIVE_YEAR, LOCKUP_CONTRACT_STATE_MAX_BITS, LOCKUP_CONTRACT_STATE_MAX_CELLS), 0 + flag::bounce_on_fail);
+        raw_reserve(get_storage_fee(WORKCHAIN, ELEVEN_YEARS, LOCKUP_CONTRACT_STATE_MAX_BITS, LOCKUP_CONTRACT_STATE_MAX_CELLS), 0 + flag::bounce_on_fail);
         send_raw_message(begin_cell()
             .store_uint(flag::non_bounceable, 6)
             .store_slice(message::sender)
@@ -164,16 +167,10 @@ int min_fee() inline {
     if (op == op::claim_tokens) {
         in_msg_body.end_parse();
         throw_unless(error::unauthorized, equal_slices(message::sender, storage::claimer_address));
-
-        int storage_due = my_storage_due();
-        msg_value -= storage_due;
         throw_unless(error::not_enough_ton, msg_value >= min_fee());
         int claimable_tokens = claimable_tokens();
         throw_unless(error::nothing_to_claim, claimable_tokens > 0);
 
-        ifnot (claimable_tokens == storage::token_balance) {
-            raw_reserve(storage_due, 4);
-        }
         cell transfer_payload = begin_cell()
             .store_uint(op::jetton_transfer, 32)
             .store_uint(query_id, 64)
@@ -240,5 +237,5 @@ int get_min_fee() method_id {
 }
 
 int get_init_storage_fee() method_id {
-    return get_storage_fee(WORKCHAIN, FIVE_YEAR, LOCKUP_CONTRACT_STATE_MAX_BITS, LOCKUP_CONTRACT_STATE_MAX_CELLS);
+    return get_storage_fee(WORKCHAIN, ELEVEN_YEARS, LOCKUP_CONTRACT_STATE_MAX_BITS, LOCKUP_CONTRACT_STATE_MAX_CELLS);
 }
