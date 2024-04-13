@@ -39,6 +39,7 @@ The vesting contract is designed to work with the standart (reference) jetton im
 ### Informational and optimizations
 * **Missing inline_ref modifiers (resolved)**
 * **Longer error codes are more expensive (resolved)**
+* **It's better to do `.end_parse()` during data parsing (resolved)**
 * **`claimer_address` is supposed not to have the Anycast field**\
   Otherwise the `TRANSFER_PAYLOAD_MAX_BITS` should be higher. However it's not intended to start a vesting for such a wallet.
 
