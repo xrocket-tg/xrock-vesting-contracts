@@ -30,7 +30,7 @@ The vesting contract is designed to work with the standart (reference) jetton im
 * **Possible claim fails due to hardcoded constants in the reference jetton implementation (resolved)**\
   Before sending the request to transfer the claimed tokens to the jetton wallet, the contract checks that the message value is enough to pay for all the fees. However, in the case the blockchain fees are decreased it could lead to the request being denied by the standart jetton wallet because it uses hardcoded values for the fees. Together with the previous issue it could lead to the token loss.
 * **Possible freezing of the contract or one of the jetton wallets (resolved)**\
-  The vesting contract or its jetton wallet freezing doesn't lead to a loss (but obviously require them to be unfrozen to continue functioning). However, a loss could happen if the user's jetton wallet is frozen. Unfortunately, it's an inherent problem of the jetton standart. So it's important to transfer a small reserve amount (0.2 tons is enough for at least 20 years) for storage fees to the user's jetton wallet during the deployment stage. It's desided not to put this functionality to the vesting contract to avoid overcomplication.
+  The vesting contract or its jetton wallet freezing doesn't lead to a loss (but obviously require them to be unfrozen to continue functioning). However, a loss could happen if the user's jetton wallet is frozen. Unfortunately, it's an inherent problem of the jetton standart. It's somehow mitigated by relatively large `freeze_due_limit` config param, but it's better not to rely on it. So it's important to transfer a small reserve amount (0.2 tons is enough for at least 20 years) for storage fees to the user's jetton wallet during the deployment stage. It's desided not to put this functionality to the vesting contract to avoid overcomplication.
 
 ### Minor severity
 * **Lack of handling of the `vesting_period = 0` case (resolved)**\
@@ -47,5 +47,5 @@ The vesting contract is designed to work with the standart (reference) jetton im
 After resolving the issues the contract is safe. However, it's important to 
 * Check the vesting parameters after the deployment
 * Check that the vesting's jetton wallet has enough jettons to be claimed
-* Transfer enough funds (0.2 tons) to the user's jetton wallet so it doesn't freeze until the vesting is over
-* Transfer enough funds (0.2 tons) to the vesting's jetton wallet as well
+* Transfer enough funds (0.11 tons) to the user's jetton wallet so it doesn't freeze until the vesting is over
+* Transfer enough funds (0.11 tons) to the vesting's jetton wallet as well
